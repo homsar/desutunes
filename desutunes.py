@@ -45,7 +45,10 @@ class Desutunes(QWidget):
         except:
             return False
         else:
-            self._model.addRecords(getMetadataForFileList(files))
+            if len(files) == 1 and files[0].endswith('xml'):
+                self._model.addRecords(handleXML(files[0]))
+            else:
+                self._model.addRecords(getMetadataForFileList(files))
 
     def tableDoubleClick(self, cell):
         if not (cell.flags() & Qt.ItemIsEditable):
