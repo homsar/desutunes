@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QFileInfo, QDir
 from collections import namedtuple
 from tablemodel import headers
-from mutagen import easyid3, id3, easymp4, mp4, flac
+from mutagen import easyid3, id3, mp3, easymp4, mp4, aac, flac
 from random import choice
 from datetime import datetime, timezone
 import re
@@ -9,6 +9,7 @@ import re
 metadata = namedtuple("metadata", 
                       [header.replace(' ', '') for header in headers])
 _blank = [""]
+_nullroledetail = {'anime': '', 'role': '', 'rolepre': '', 'rolepost': ''}
 
 def random_id():
     '''Generate a random string that looks like an iTunes track identifier.
@@ -50,22 +51,26 @@ def role_detail(role):
     '''Split up a role into constituent components.
     Based loosely on https://github.com/colons/nkd.su/blob/19680bbe243aabdb8049f43cdad096362cc8c4dc/nkdsu/apps/vote/models.py'''
 
-    if role is None:
-        return {}
+    if role is None or role == '':
+        return _nullroledetail
     
-    return re.match(
-        r'^(?P<anime>.*?) ?\b'
-        r'(?P<rolepre>(rebroadcast)?) ?'
-        r'\b(?P<role>'
-        
-        r'(ED|OP|(character|image) song\b|'
-        r'(insert (track|song)\b)|ins|'
-        r'(main )?theme|bgm|ost))'
-        r' ?'
-        r'(?P<rolepost>.*)$',
-        role,
-        flags=re.IGNORECASE,
-    ).groupdict()
+    try:
+        return re.match(
+            r'^(?P<anime>.*?) ?\b'
+            r'(?P<rolepre>(rebroadcast)?) ?'
+            r'\b(?P<role>'
+            
+            r'(ED|OP|(character|image) song\b|'
+            r'(insert (track|song)\b)|ins|'
+            r'(main )?theme|bgm|ost))'
+            r' ?'
+            r'(?P<rolepost>.*)$',
+            role,
+            flags=re.IGNORECASE,
+            ).groupdict()
+    except Exception as ex:
+        return {**_nullroledetail, **{'rolepost': role}}
+
 
 
 def part(trackTitle):
@@ -104,7 +109,7 @@ def getMetadataForFileList(filenames):
             metadata.extend(processFile(filename, info))
     return metadata
 
-def processid3(filename):
+def processid3(filename, audioengine=mp3.MP3):
     '''Reads metadata from tracks that use the ID3 format - MP3, AAC'''
 
     f = easyid3.EasyID3(filename)
@@ -121,18 +126,22 @@ def processid3(filename):
                 break
         else:
             return []
+
+    af = audioengine(filename)
     
     return [metadata(
         ID=random_id(),
         Filename=filename,
         Tracktitle=title,
+        Album=f.get(album, _blank)[0],
+        Length=int(af.info.length * 1000),
         Anime=anime,
         Role=role,
         Rolequalifier=rolequal,
         Artist=f.get('artist', _blank)[0],
         Composer=f.get('composer', _blank)[0],
         Label=label,
-        InCatsystem=False,
+        InMyriad="NO",
         Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )]
 
@@ -143,6 +152,7 @@ def processm4a(filename):
     title, anime, role, rolequal = part(f.get('title', _blank)[0])
     artist = f.get('artist', _blank)[0]
     label = f.get('description', _blank)[0]
+    album = f.get('album', _blank)[0]
 
     f = mp4.MP4(filename)
     composer = f.get('©wrt', _blank)
@@ -150,13 +160,15 @@ def processm4a(filename):
         ID=random_id(),
         Filename=filename,
         Tracktitle=title,
+        Album=album,
+        Length=int(f.info.length * 1000),
         Anime=anime,
         Role=role,
         Rolequalifier=rolequal,
         Artist=artist,
         Composer=composer,
         Label=label,
-        InCatsystem=False,
+        InMyriad="NO",
         Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )]
 
@@ -169,18 +181,21 @@ def processflac(filename):
     label = f.get('description', _blank)[0]
     if not label:
         label = f.get('subtitle', _blank)[0]
+    album = f.get('album', _blank)[0]
 
     return [metadata(
         ID=random_id(),
         Filename=filename,
         Tracktitle=title,
+        Album=album,
+        Length=int(f.info.length * 1000),
         Anime=anime,
         Role=role,
         Rolequalifier=rolequal,
         Artist=artist,
         Composer=composer,
         Label=label,
-        InCatsystem=False,
+        InMyriad="NO",
         Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )]
 
@@ -188,7 +203,7 @@ def processFile(filename, info):
     suffix = info.suffix().lower()
     processors = {
         'mp3': processid3, 
-        'aac': processid3,
+        'aac': partial(processid3, audioengine=aac.AAC),
         'm4a': processm4a, 
         'flac': processflac
         }

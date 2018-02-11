@@ -55,12 +55,14 @@ headers = [
     "File name",
     "Track title",
     "Artist",
+    "Album",
+    "Length",
     "Anime",
     "Role",
     "Role qualifier",
     "Label",
     "Composer",
-    "In Cat system",
+    "In Myriad",
     "Date added"
     ]
 col = headers.index
@@ -87,8 +89,12 @@ class desuplayerModel(QSqlTableModel):
             file = Path(fileName)
             if not file.is_file():
                 return QBrush(QColor(255, 128, 128))
-            elif super().data(self.index(item.row(), col("In Cat system")), 
-                              Qt.DisplayRole) == 0:
+            elif (super().data(self.index(item.row(), col("In Myriad")), 
+                              Qt.DisplayRole) in ["NO", "AWAITING EDITS"]
+                  or super().data(self.index(item.row(), col("Label")),
+                                  Qt.DisplayRole) == ''
+                  or super().data(self.index(item.row(), col("Composer")),
+                                  Qt.DisplayRole) == ''):
                 return QBrush(QColor(255, 255, 128))
         return super().data(item, role)
 

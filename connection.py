@@ -49,12 +49,14 @@ def initDatabase(db):
         "filename text, "
         "tracktitle text, "
         "artist text, "
+        "album text, "
+        "length integer, "
         "anime text, "
         "role text, "
         "rolequant text, "
         "label text, "
         "composer text, "
-        "incatsystem boolean, "
+        "inmyriad text, "
         "dateadded text)"
         )
 
