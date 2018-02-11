@@ -123,8 +123,8 @@ class desuplayerModel(QSqlTableModel):
         result = result and self.select()
         return result
 
-def loadDatabase():
-    if not connection.createConnection():
+def loadDatabase(database):
+    if not connection.createConnection(database):
         return False
     return desuplayerModel()
 

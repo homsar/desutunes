@@ -6,13 +6,14 @@ from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
 from tablemodel import loadDatabase, col
 from processfile import getMetadataForFileList
+from processitunes import handleXML
 from player import AudioPlayer
 
 class Desutunes(QWidget):
-    def __init__(self):
+    def __init__(self, database):
         super().__init__()
         
-        self._model = loadDatabase()
+        self._model = loadDatabase(database)
         if not self._model:
             print("Unable to load database.")
             sys.exit()
@@ -64,9 +65,15 @@ class Desutunes(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    icon = QIcon("icon.png")
-    icon.addFile("iconS.png")
+    if len(sys.argv) >= 2 and sys.argv[1].startswith('inu'):
+        icon = QIcon("inuicon.png")
+        icon.addFile("inuicon_small.png")
+        database = 'inudesutunes.db'
+    else:
+        icon = QIcon("icon.png")
+        icon.addFile("icon_small.png")
+        database = 'desutunes.db'
     app.setWindowIcon(icon)
-    desutunes = Desutunes()
+    desutunes = Desutunes(database)
     desutunes.show()
     sys.exit(app.exec_())

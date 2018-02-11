@@ -60,9 +60,9 @@ def initDatabase(db):
 
     return True
 
-def createConnection():
+def createConnection(database):
     db = QSqlDatabase.addDatabase('QSQLITE')
-    db.setDatabaseName('desutunes.db')
+    db.setDatabaseName(database)
     if not db.open():
         QMessageBox.critical(None, "Cannot open database",
                 "Unable to establish a database connection.\n"
