@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QFileInfo, QDir
 from collections import namedtuple
+from functools import partial
 from tablemodel import headers
 from mutagen import easyid3, id3, mp3, easymp4, mp4, aac, flac
 from random import choice
@@ -101,11 +102,16 @@ def getMetadataForFileList(filenames):
     for filename in filenames:
         info = QFileInfo(filename)
         if info.isDir() and info.isExecutable():
+            print(filename)
             dir = QDir(filename)
-            metadata.extend(processFileList(dir.entryList(
-                        QDir.NoDotAndDotDot
-                        )))
+            print(dir.entryList(QDir.AllEntries | QDir.NoDotAndDotDot))
+            metadata.extend(getMetadataForFileList(
+                    [i.filePath()
+                    for i in dir.entryInfoList(
+                        QDir.AllEntries | QDir.NoDotAndDotDot
+                        )]))
         elif info.isFile() and info.isReadable():
+            print(filename)
             metadata.extend(processFile(filename, info))
     return metadata
 
