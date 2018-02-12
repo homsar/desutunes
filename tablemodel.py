@@ -80,7 +80,7 @@ class desuplayerModel(QSqlTableModel):
         for index, name in enumerate(headers):
             self.setHeaderData(index, Qt.Horizontal, name)
 
-    def data(self, item, role):
+    def data(self, item, role=Qt.DisplayRole):
         if role == Qt.BackgroundRole:
             fileName = super().data(self.index(item.row(), col("File name")), 
                                     Qt.DisplayRole)

@@ -82,12 +82,15 @@ class AudioPlayer(QWidget):
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
 
-    def openFile(self, fileName):
+    def openFile(self, fileName, text=None):
         if fileName != '':
             self.mediaPlayer.setMedia(
                     QMediaContent(QUrl.fromLocalFile(fileName)))
             self.playButton.setEnabled(True)
-            self.messages.setText(fileName)
+            if not text:
+                self.messages.setText(fileName.split('/')[-1])
+            else:
+                self.messages.setText(text)
 
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:

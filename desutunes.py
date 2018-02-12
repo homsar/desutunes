@@ -55,7 +55,12 @@ class Desutunes(QWidget):
             row = cell.row()
             filename = self._model.data(self._model.index(row, col("File name")),
                                         Qt.DisplayRole)
-            self._player.openFile(filename)
+            self._player.openFile(
+                filename,
+                text='{} - {}'.format(
+                    self._model.data(self._model.index(row, col("Track title"))),
+                    self._model.data(self._model.index(row, col("Artist")))
+                    ))
             self._player.play()
 
     def keyPressEvent(self, event):
