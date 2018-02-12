@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-import sys
+import sys, os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
 from tablemodel import loadDatabase, col
 from processfile import getMetadataForFileList
-from processitunes import handleXML
+from processitunes import handleXML, exportXML
 from player import AudioPlayer
 
 class Desutunes(QWidget):
@@ -68,7 +68,7 @@ class Desutunes(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    if len(sys.argv) >= 2 and sys.argv[1].startswith('inu'):
+    if 'inu' in sys.argv or 'inudesu' in sys.argv:
         icon = QIcon("inuicon.png")
         icon.addFile("inuicon_small.png")
         database = 'inudesutunes.db'
@@ -78,5 +78,15 @@ if __name__ == '__main__':
         database = 'desutunes.db'
     app.setWindowIcon(icon)
     desutunes = Desutunes(database)
-    desutunes.show()
-    sys.exit(app.exec_())
+    if 'dump' in sys.argv:
+        try:
+            os.rename("songlibrary.xml", "songlibrary.xml.old")
+        except:
+            pass
+        else:
+            print("Backed up songlibrary.xml to songlibrary.xml.old, overwriting any previous backup/")
+        exportXML(desutunes._model, "songlibrary.xml")
+    else:
+        desutunes.show()
+        sys.exit(app.exec_())
+    
