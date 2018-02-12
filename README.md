@@ -1,4 +1,4 @@
-# desutunes - a [Neko Desu](https://nekodesu.co.uk) library manager for desktop
+# desutunes - a [Neko Desu](http://nekodesu.co.uk) library manager for desktop
 
 desutunes is designed to replicate all features of iTunes that are relied on to manage the Neko Desu library, but without needing to use an ancient version of OS X and iTunes.
 
