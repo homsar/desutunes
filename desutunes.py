@@ -3,11 +3,12 @@
 import sys, os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget, QVBoxLayout
 from tablemodel import loadDatabase, col
 from processfile import getMetadataForFileList
 from processitunes import handleXML, exportXML
 from player import AudioPlayer
+from menu import setUpMenu
 
 class Desutunes(QWidget):
     def __init__(self, database):
@@ -31,13 +32,41 @@ class Desutunes(QWidget):
         self.setLayout(boxes)
         self.resize(1024, 768)
         self.setWindowTitle("desutunes")
+        self.palette().setColor(self.backgroundRole(), Qt.lightGray)
+        self._menuBar, self._menu = setUpMenu(self)
         self.show()
+        self.raise_()
 
     def dragEnterEvent(self, e):
         if e.mimeData().hasUrls:
             e.accept()
         else:
             e.reject()
+
+    def toggleDanger(self, checked):
+        if self._model._lock_edits and checked:
+            reply = QMessageBox.question(
+                self,
+                "Danger, danger!",
+                "Danger mode removes the lock on editing the 'ID', 'File name', "
+                "'Length', and 'Date added' fields. This could muck up"
+                "the database state and/or nkd.su. Proceed with caution!\n\n"
+                "Do you want to continue?",
+                QMessageBox.Yes,
+                QMessageBox.No
+                )
+            if reply == QMessageBox.Yes:
+                self._model._lock_edits = False
+                p  = self.palette()
+                p.setColor(self.backgroundRole(), Qt.red)
+                self.setPalette(p)
+            else:
+                self._menu['danger'].setChecked(False)
+        else:
+            self._model._lock_edits = True
+            p = self.palette()
+            p.setColor(self.backgroundRole(), Qt.lightGray)
+            self.setPalette(p)
 
     def dropEvent(self, e):
         try:
