@@ -99,7 +99,7 @@ class desuplayerModel(QSqlTableModel):
         return super().data(item, role)
 
     def flags(self, index):
-        if (headers[index.column()] in ("ID", "File name", "Date added") 
+        if (headers[index.column()] in ("ID", "File name", "Length", "Date added") 
             and self._lock_edits):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
         else:
