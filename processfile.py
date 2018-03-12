@@ -5,12 +5,16 @@ from tablemodel import headers
 from mutagen import easyid3, id3, mp3, easymp4, mp4, aac, flac
 from random import choice
 from datetime import datetime, timezone
+from pathlib import Path
 import re
 
-metadata = namedtuple("metadata", 
-                      [header.replace(' ', '') for header in headers])
+metadata = namedtuple("metadata",
+                      [header.replace(' ', '')
+                       for header in headers + ['OriginalFileName']])
 _blank = [""]
+_unknown = ["Unknown Artist"]
 _nullroledetail = {'anime': '', 'role': '', 'rolepre': '', 'rolepost': ''}
+
 
 def random_id():
     '''Generate a random string that looks like an iTunes track identifier.
@@ -94,6 +98,11 @@ def part(trackTitle):
         role = role_components['role'].lower()
     return title, role_components['anime'], role, rolequal
 
+
+def canonicalFileName(id, artist, title, extension):
+    return Path(artist) / f'{title} ({id}).{extension}'
+
+
 def getMetadataForFileList(filenames):
     '''Takes a list of filenames, returns a list of metadata associated with
     all files in that list that are readable tracks'''
@@ -133,13 +142,16 @@ def processid3(filename, audioengine=mp3.MP3):
         else:
             return []
 
+    artist = f.get('artist', _unknown)[0]
     af = audioengine(filename)
-    
+    id = random_id()
+
     return [metadata(
-        ID=random_id(),
-        Filename=filename,
+        ID=id,
+        OriginalFileName=filename,
+        Filename=canonicalFileName(id, artist, title, filename[-3:]),
         Tracktitle=title,
-        Album=f.get(album, _blank)[0],
+        Album=f.get('album', _blank)[0],
         Length=int(af.info.length * 1000),
         Anime=anime,
         Role=role,
@@ -151,20 +163,24 @@ def processid3(filename, audioengine=mp3.MP3):
         Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )]
 
+
 def processm4a(filename):
     '''Reads metadata from MPEG-4 audio files'''
 
     f = easymp4.EasyMP4(filename)
     title, anime, role, rolequal = part(f.get('title', _blank)[0])
     artist = f.get('artist', _blank)[0]
+    fn_artist = artist if artist else 'Unknown Artist'
     label = f.get('description', _blank)[0]
     album = f.get('album', _blank)[0]
+    id = random_id()
 
     f = mp4.MP4(filename)
     composer = f.get('©wrt', _blank)
     return [metadata(
-        ID=random_id(),
-        Filename=filename,
+        ID=id,
+        OriginalFileName=filename,
+        Filename=canonicalFileName(id, fn_artist, title, 'm4a'),
         Tracktitle=title,
         Album=album,
         Length=int(f.info.length * 1000),
@@ -188,10 +204,14 @@ def processflac(filename):
     if not label:
         label = f.get('subtitle', _blank)[0]
     album = f.get('album', _blank)[0]
+    artist = f.get('artist', _blank)[0]
+    fn_artist = artist if artist else 'Unknown Artist'
+    id = random_id()
 
     return [metadata(
-        ID=random_id(),
-        Filename=filename,
+        ID=id,
+        OriginalFileName=filename,
+        Filename=canonicalFileName(id, artist, title, 'flac'),
         Tracktitle=title,
         Album=album,
         Length=int(f.info.length * 1000),

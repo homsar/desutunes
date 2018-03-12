@@ -43,11 +43,11 @@
 
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QTableView
+from PyQt5.QtWidgets import QApplication, QMessageBox, QTableView
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlRecord
-from pathlib import Path
 
+import shutil
 import connection
 
 headers = [
@@ -106,15 +106,33 @@ class desuplayerModel(QSqlTableModel):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
     def addRecords(self, tracks):
+        failures = []
         for track in tracks:
+            try:
+                if not (self.libraryPath / track.Filename.parent).is_dir():
+                    (self.libraryPath / track.Filename.parent).mkdir()
+                shutil.copyfile(track.OriginalFileName,
+                                self.libraryPath / track.Filename)
+            except Exception as ex:
+                print(ex)
+                failures.append(track)
+                continue
             self._lock_edits = False
             record = self.record()
             for fieldName, fieldValue in track._asdict().items():
-                record.setValue(fieldName, fieldValue)
+                if not fieldName == 'OriginalFileName':
+                    record.setValue(fieldName, str(fieldValue))
             insertSuccess = self.insertRecord(-1, record)
             assert insertSuccess
             self._lock_edits = True
         self.submitAll()
+        if len(failures) > 0:
+            QMessageBox.warning(
+                self.parent(),
+                "Import error",
+                f'{len(failures)} track{"" if len(failures) == 1 else "s"} '
+                'could not be imported successfully'
+                )
         return True
 
     def createView(self, title):
@@ -129,10 +147,12 @@ class desuplayerModel(QSqlTableModel):
         result = result and self.select()
         return result
 
-def loadDatabase(database):
-    if not connection.createConnection(database):
+
+def loadDatabase(database, libraryPath):
+    if not connection.createConnection(libraryPath / database):
         return False
-    return desuplayerModel()
+    return desuplayerModel(libraryPath)
+
 
 if __name__ == '__main__':
 

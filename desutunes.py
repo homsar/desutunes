@@ -1,22 +1,43 @@
 #! /usr/bin/env python
 
-import sys, os
-from PyQt5.QtCore import Qt
+import sys
+import os
+from pathlib import Path
+from PyQt5.QtCore import Qt, QSettings, QSize, QPoint
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import (
+    QApplication, QDialog, QFileDialog, QMessageBox, QWidget, QVBoxLayout
+    )
 from tablemodel import loadDatabase, col
 from processfile import getMetadataForFileList
 from processitunes import handleXML, exportXML
 from player import AudioPlayer
 from menu import setUpMenu
+from shutil import move
+
 
 class Desutunes(QWidget):
-    def __init__(self, database):
+    def __init__(self, database, mode):
         super().__init__()
-        
-        self._model = loadDatabase(database)
+
+        self.settings = QSettings('h0m54r', 'desutunes')
+        libraryPath = self.settings.value(
+            f'{mode}/libraryPath',
+            defaultValue=os.path.expanduser(f'~/{mode}tunes')
+            )
+        self.libraryPath = Path(libraryPath)
+        try:
+            self.libraryPath.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            QMessageBox.warning(self, "Couldn't create library",
+                                "Unable to create a library folder.")
+            sys.exit()
+
+        self._model = loadDatabase(database, self.libraryPath)
+        self._mode = mode
         if not self._model:
-            print("Unable to load database.")
+            QMessageBox.warning("Unable to load database.",
+                                "desutunes couldn't load the database.")
             sys.exit()
             
         self.initUI()
@@ -30,9 +51,17 @@ class Desutunes(QWidget):
         boxes.addWidget(self._player)
         boxes.addWidget(self._tableView)
         self.setLayout(boxes)
-        self.resize(1024, 768)
-        self.setWindowTitle("desutunes")
-        self.palette().setColor(self.backgroundRole(), Qt.lightGray)
+        self.resize(self.settings.value("window/size",
+                                        defaultValue=QSize(1024, 768),
+                                        type=QSize))
+        self.move(self.settings.value("window/pos",
+                                      defaultValue=QPoint(200, 200),
+                                      type=QPoint))
+        self.setWindowTitle(f"{self._mode}tunes")
+        p = self.palette()
+        p.setColor(self.backgroundRole(), Qt.lightGray)
+        self.setPalette(p)
+
         self._menuBar, self._menu = setUpMenu(self)
         self.show()
         self.raise_()
@@ -68,6 +97,24 @@ class Desutunes(QWidget):
             p.setColor(self.backgroundRole(), Qt.lightGray)
             self.setPalette(p)
 
+    def libraryLocation(self):
+        browser = QFileDialog(
+            self,
+            f"Choose where to place the {self._mode} library",
+            )
+        browser.setFileMode(QFileDialog.DirectoryOnly)
+
+        if browser.exec_() == QDialog.Accepted:
+            self.settings.setValue(f'{self._mode}/libraryPath',
+                                   browser.selectedFiles()[0])
+            QMessageBox.information(
+                self,
+                'Library location changed',
+                'Library location changed.\n\n'
+                'Reopen desutunes to load the new library.'
+                )
+            self.close()
+
     def dropEvent(self, e):
         try:
             files = [url.toLocalFile() for url in e.mimeData().urls()]
@@ -82,12 +129,15 @@ class Desutunes(QWidget):
     def tableDoubleClick(self, cell):
         if not (cell.flags() & Qt.ItemIsEditable):
             row = cell.row()
-            filename = self._model.data(self._model.index(row, col("File name")),
-                                        Qt.DisplayRole)
+            filename = self._model.data(
+                self._model.index(row, col("File name")),
+                Qt.DisplayRole
+            )
             self._player.openFile(
-                filename,
+                str(self.libraryPath / filename),
                 text='{} - {}'.format(
-                    self._model.data(self._model.index(row, col("Track title"))),
+                    self._model.data(self._model.index(row, col
+                                                       ("Track title"))),
                     self._model.data(self._model.index(row, col("Artist")))
                     ))
             self._player.play()
@@ -96,9 +146,22 @@ class Desutunes(QWidget):
         if event.matches(QKeySequence.Delete):
             selectionModel = self._tableView.selectionModel()
             for row in reversed(selectionModel.selectedRows()):
+                fileName = self._model.data(
+                    self._model.index(row.row(), col("File name")))
+                original = self.libraryPath / fileName
+                if original.exists():
+                    (self.libraryPath / "__deleted__").mkdir(
+                        parents=True, exist_ok=True
+                        )
+                    move(str(original), str(self.libraryPath / "__deleted__"))
                 self._model.removeRecord(row.row())
         super().keyPressEvent(event)
-        
+
+    def closeEvent(self, event):
+        self.settings.setValue('window/size', self.size())
+        self.settings.setValue('window/pos', self.pos())
+        event.accept()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -106,21 +169,23 @@ if __name__ == '__main__':
         icon = QIcon("inuicon.png")
         icon.addFile("inuicon_small.png")
         database = 'inudesutunes.db'
+        mode = 'inudesu'
     else:
         icon = QIcon("icon.png")
         icon.addFile("icon_small.png")
         database = 'desutunes.db'
+        mode = 'nekodesu'
     app.setWindowIcon(icon)
-    desutunes = Desutunes(database)
+    desutunes = Desutunes(database, mode)
     if 'dump' in sys.argv:
         try:
             os.rename("songlibrary.xml", "songlibrary.xml.old")
-        except:
+        except Exception:
             pass
         else:
-            print("Backed up songlibrary.xml to songlibrary.xml.old, overwriting any previous backup/")
+            print("Backed up songlibrary.xml to songlibrary.xml.old, "
+                  "overwriting any previous backup/")
         exportXML(desutunes._model, "songlibrary.xml")
     else:
         desutunes.show()
         sys.exit(app.exec_())
-    
