@@ -167,13 +167,13 @@ class Desutunes(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     if 'inu' in sys.argv or 'inudesu' in sys.argv:
-        icon = QIcon("inuicon.png")
-        icon.addFile("inuicon_small.png")
+        icon = QIcon("icons/png/inuicon.png")
+        icon.addFile("icons/png/inuicon_small.png")
         database = 'inudesutunes.db'
         mode = 'inudesu'
     else:
-        icon = QIcon("icon.png")
-        icon.addFile("icon_small.png")
+        icon = QIcon("icons/png/icon.png")
+        icon.addFile("icons/png/icon_small.png")
         database = 'desutunes.db'
         mode = 'nekodesu'
     app.setWindowIcon(icon)

@@ -33,22 +33,22 @@ Clone the repository, install Python 3.6 and the dependencies in `requirements.t
 To run desutunes:
 
 ```bash
-python desutunes.py
+python desutunes/desutunes.py
 ```
 
 To run in Inu Desu mode:
 ```bash
-python desutunes.py inu
+python desutunes/desutunes.py inu
 ```
 
 To dump the library XML out:
 ```bash
-python desutunes.py dump
+python desutunes/desutunes.py dump
 ```
 
 In case it's not obvious, to dump the Inu Desu XML:
 ```bash
-python desutunes.py inu dump
+python desutunes/desutunes.py inu dump
 ```
 
 To import audio:
