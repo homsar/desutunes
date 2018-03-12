@@ -163,6 +163,18 @@ class Desutunes(QWidget):
         self.settings.setValue('window/pos', self.pos())
         event.accept()
 
+    def dumpXML(self):
+        browser = QFileDialog(
+            self,
+            "Pick a file to save the XML to."
+        )
+        browser.setAcceptMode(QFileDialog.AcceptSave)
+        browser.setDefaultSuffix("xml")
+        if browser.exec_() == QDialog.Accepted:
+            exportXML(
+                self._model, self.libraryPath, browser.selectedFiles()[0]
+            )
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -186,7 +198,7 @@ if __name__ == '__main__':
         else:
             print("Backed up songlibrary.xml to songlibrary.xml.old, "
                   "overwriting any previous backup/")
-        exportXML(desutunes._model, "songlibrary.xml")
+        exportXML(desutunes._model, desutunes.libraryPath, "songlibrary.xml")
     else:
         desutunes.show()
         sys.exit(app.exec_())

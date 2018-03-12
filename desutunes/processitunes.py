@@ -56,7 +56,7 @@ def handleXML(fileName):
     return tracks
 
 
-def exportXML(model, fileName):
+def exportXML(model, libraryPath, fileName):
     tracks = {}
     episode_map = {
         'NO': 'NOT IN MYRIAD',
@@ -67,7 +67,7 @@ def exportXML(model, fileName):
         tracks[str(i)] = {
                 'Track ID': str(i+1),
                 'Persistent ID': r.value('ID'),
-                'Location': pathlib.Path(r.value('Filename')).as_uri(),
+                'Location': (libraryPath / r.value('Filename')).as_uri(),
                 'Name': '{} ({} {}{}{})'.format(
                     r.value('Tracktitle'),
                     r.value('Anime'),

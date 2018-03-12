@@ -17,6 +17,13 @@ def setUpMenu(parent):
     )
     menu['libraryLocation'].triggered.connect(parent.libraryLocation)
 
+    menu['dump'] = QtWidgets.QAction("Dump &XML...", parent)
+    menu['dump'].setShortcut('Ctrl+X')
+    menu['dump'].setStatusTip(
+        'Export the library as an iTunes XML file to upload to nkd.su'
+    )
+    menu['dump'].triggered.connect(parent.dumpXML)
+
     menuBar = QtWidgets.QMenuBar(parent)
     toolsMenu = menuBar.addMenu('&Tools')
     for item in menu.values():

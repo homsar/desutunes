@@ -41,15 +41,8 @@ To run in Inu Desu mode:
 python desutunes/desutunes.py inu
 ```
 
-To dump the library XML out:
-```bash
-python desutunes/desutunes.py dump
-```
+To dump the library XML out, choose "Dump XML..." from the Tools menu.
 
-In case it's not obvious, to dump the Inu Desu XML:
-```bash
-python desutunes/desutunes.py inu dump
-```
 
 To import audio:
 
