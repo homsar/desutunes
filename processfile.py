@@ -24,11 +24,11 @@ def random_id():
     hex_digits = "0123456789ABCDEF"
     return "".join([choice(hex_digits) for _ in range(16)])
 
+
 def split_id3_title(id3_title):
-    """
-    Take a 'Title (role)'-style ID3 title and return (title, role)
-    from https://github.com/colons/nkd.su/blob/230a68e2f7231a3b8e80dea9f2a628d637b0792e/nkdsu/apps/vote/utils.py
-    """
+    '''Take a 'Title (role)'-style ID3 title and return (title, role)
+    from https://git.io/vxJtU'''
+
     role = None
 
     bracket_depth = 0
@@ -52,19 +52,20 @@ def split_id3_title(id3_title):
 
     return title, role
 
+
 def role_detail(role):
     '''Split up a role into constituent components.
-    Based loosely on https://github.com/colons/nkd.su/blob/19680bbe243aabdb8049f43cdad096362cc8c4dc/nkdsu/apps/vote/models.py'''
+    Based loosely on https://git.io/vxJtt'''
 
     if role is None or role == '':
         return _nullroledetail
-    
+
     try:
         return re.match(
             r'^(?P<anime>.*?) ?\b'
             r'(?P<rolepre>(rebroadcast)?) ?'
             r'\b(?P<role>'
-            
+
             r'(ED|OP|(character|image) song\b|'
             r'(insert (track|song)\b)|ins|'
             r'(main )?theme|bgm|ost))'
@@ -77,20 +78,20 @@ def role_detail(role):
         return {**_nullroledetail, **{'rolepost': role}}
 
 
-
 def part(trackTitle):
-    '''Take a trackTitle and return its component parts: 
+    '''Take a trackTitle and return its component parts:
      - the track title proper
      - the anime from which it comes
      - the role in said anime
-     - any qualifier on that role (e.g. if role is ED, then which number/season/episode'''
-    
+     - any qualifier on that role (e.g. if role is ED,
+       then which number/season/episode'''
+
     title, full_role = split_id3_title(trackTitle)
     role_components = role_detail(full_role)
     if role_components['rolepre'] == '' or role_components['rolepost'] == '':
         rolequal = role_components['rolepre'] + role_components['rolepost']
     else:
-        rolequal = ', '.join(role_components['rolepre'], 
+        rolequal = ', '.join(role_components['rolepre'],
                              role_components['rolepost'])
     if len(role_components['role']) == 2:
         role = role_components['role'].upper()
@@ -116,13 +117,14 @@ def getMetadataForFileList(filenames):
             print(dir.entryList(QDir.AllEntries | QDir.NoDotAndDotDot))
             metadata.extend(getMetadataForFileList(
                     [i.filePath()
-                    for i in dir.entryInfoList(
-                        QDir.AllEntries | QDir.NoDotAndDotDot
-                        )]))
+                     for i in dir.entryInfoList(
+                             QDir.AllEntries | QDir.NoDotAndDotDot
+                     )]))
         elif info.isFile() and info.isReadable():
             print(filename)
             metadata.extend(processFile(filename, info))
     return metadata
+
 
 def processid3(filename, audioengine=mp3.MP3):
     '''Reads metadata from tracks that use the ID3 format - MP3, AAC'''
@@ -219,22 +221,22 @@ def processflac(filename):
         Role=role,
         Rolequalifier=rolequal,
         Artist=artist,
-        Composer=composer,
+        Composer=f.get('composer', _blank)[0],
         Label=label,
         InMyriad="NO",
         Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )]
 
+
 def processFile(filename, info):
     suffix = info.suffix().lower()
     processors = {
-        'mp3': processid3, 
+        'mp3': processid3,
         'aac': partial(processid3, audioengine=aac.AAC),
-        'm4a': processm4a, 
+        'm4a': processm4a,
         'flac': processflac
         }
     if suffix not in processors:
         return []
     else:
         return processors[suffix](filename)
-    

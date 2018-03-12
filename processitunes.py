@@ -6,17 +6,18 @@ from datetime import datetime, timezone
 
 _itunes_headers = {
     -1: 'Track ID',
-     0: 'Persistent ID',
-     1: 'Location',
-     2: 'Track title',
-     3: 'Artist',
-     4: 'Album',
-     5: 'Total Time',
-     9: 'Description',
-     10: 'Composer',
-     11: 'Episode',
-     12: 'Date Added'
+    0: 'Persistent ID',
+    1: 'Location',
+    2: 'Track title',
+    3: 'Artist',
+    4: 'Album',
+    5: 'Total Time',
+    9: 'Description',
+    10: 'Composer',
+    11: 'Episode',
+    12: 'Date Added'
 }
+
 
 def handleXML(fileName):
     try:
@@ -24,7 +25,7 @@ def handleXML(fileName):
             plist = plistlib.load(f)
     except Exception as e:
         return []
-    
+
     tracks = []
 
     for tid, track in plist['Tracks'].items():
@@ -33,9 +34,9 @@ def handleXML(fileName):
         inMyriad = track.get('Episode', 'Yes')
         if inMyriad.lower() == 'not in myriad':
             inMyriad = "NO"
-            
+
         title, anime, role, rolequal = part(track['Name'])
-        
+
         track_metadata = metadata(
             ID=track['Persistent ID'],
             Filename=unquote(urlparse(track['Location']).path),
@@ -53,6 +54,7 @@ def handleXML(fileName):
             )
         tracks.append(track_metadata)
     return tracks
+
 
 def exportXML(model, fileName):
     tracks = {}

@@ -1,4 +1,5 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtWidgets
+
 
 def setUpMenu(parent):
     menu = {}
@@ -20,7 +21,7 @@ def setUpMenu(parent):
     toolsMenu = menuBar.addMenu('&Tools')
     for item in menu.values():
         toolsMenu.addAction(item)
-        
-    #QtWidgets.QStatusBar(parent)
+
+    # QtWidgets.QStatusBar(parent)
 
     return menuBar, menu

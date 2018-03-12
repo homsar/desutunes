@@ -39,7 +39,7 @@ class Desutunes(QWidget):
             QMessageBox.warning("Unable to load database.",
                                 "desutunes couldn't load the database.")
             sys.exit()
-            
+
         self.initUI()
 
     def initUI(self):
@@ -77,16 +77,17 @@ class Desutunes(QWidget):
             reply = QMessageBox.question(
                 self,
                 "Danger, danger!",
-                "Danger mode removes the lock on editing the 'ID', 'File name', "
-                "'Length', and 'Date added' fields. This could muck up"
-                "the database state and/or nkd.su. Proceed with caution!\n\n"
+                "Danger mode removes the lock on editing the 'ID', "
+                "'File name', 'Length', and 'Date added' fields. This "
+                "could muck up the database state and/or nkd.su. "
+                "Proceed with caution!\n\n"
                 "Do you want to continue?",
                 QMessageBox.Yes,
                 QMessageBox.No
                 )
             if reply == QMessageBox.Yes:
                 self._model._lock_edits = False
-                p  = self.palette()
+                p = self.palette()
                 p.setColor(self.backgroundRole(), Qt.red)
                 self.setPalette(p)
             else:
@@ -118,7 +119,7 @@ class Desutunes(QWidget):
     def dropEvent(self, e):
         try:
             files = [url.toLocalFile() for url in e.mimeData().urls()]
-        except:
+        except Exception:
             return False
         else:
             if len(files) == 1 and files[0].endswith('xml'):
