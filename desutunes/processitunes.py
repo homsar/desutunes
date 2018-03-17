@@ -1,8 +1,10 @@
 import plistlib
 import pathlib
+from PyQt5.QtCore import QFileInfo
 from processfile import metadata, part
 from urllib.parse import urlparse, unquote
 from datetime import datetime, timezone
+from processfile import canonicalFileName, processFile
 
 _itunes_headers = {
     -1: 'Track ID',
@@ -28,31 +30,47 @@ def handleXML(fileName):
 
     tracks = []
 
-    for tid, track in plist['Tracks'].items():
+    for idx, (tid, track) in enumerate(plist['Tracks'].items()):
         if not track['Location'].startswith('file'):
             continue
         inMyriad = track.get('Episode', 'Yes')
-        if inMyriad.lower() == 'not in myriad':
+        if inMyriad.lower().startswith('not in myr'):
             inMyriad = "NO"
 
         title, anime, role, rolequal = part(track['Name'])
+        id = track['Persistent ID']
+        artist = track['Artist']
+        originalFileName = unquote(urlparse(track['Location']).path)
+        suffix = pathlib.Path(originalFileName).suffix[1:]
+        newFileName = canonicalFileName(id, artist, title, suffix)
+        label = track.get('Description', '')
+        if label == '':
+            try:
+                file_metadata = processFile(originalFileName,
+                                            QFileInfo(originalFileName))[0]
+                label = file_metadata.Label
+            except Exception as ex:
+                print(ex)
 
         track_metadata = metadata(
-            ID=track['Persistent ID'],
-            Filename=unquote(urlparse(track['Location']).path),
+            ID=id,
+            OriginalFileName=originalFileName,
+            Filename=newFileName,
             Tracktitle=title,
             Album=track.get('Album', ''),
             Length=track['Total Time'],
             Anime=anime,
             Role=role,
             Rolequalifier=rolequal,
-            Artist=track['Artist'],
+            Artist=artist,
             Composer=track.get('Composer', ''),
-            Label=track.get('Description', ''),
+            Label=label,
             InMyriad=inMyriad,
             Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
             )
         tracks.append(track_metadata)
+    print(f'Got metadata for {len(tracks)} tracks, out of '
+          f'{len(plist["Tracks"])} in the iTunes XML.')
     return tracks
 
 

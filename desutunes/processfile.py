@@ -100,8 +100,12 @@ def part(trackTitle):
     return title, role_components['anime'], role, rolequal
 
 
+def sanitize(text):
+    return text.replace('/', '').replace('\\', '').replace('\n', '')
+
+
 def canonicalFileName(id, artist, title, extension):
-    return Path(artist) / f'{title} ({id}).{extension}'
+    return Path(sanitize(artist)) /f'{sanitize(title)} ({id}).{extension}'
 
 
 def getMetadataForFileList(filenames):

@@ -17,10 +17,10 @@ from shutil import move
 
 
 class Desutunes(QWidget):
-    def __init__(self, database, mode):
+    def __init__(self, database, mode, settings):
         super().__init__()
 
-        self.settings = QSettings('h0m54r', 'desutunes')
+        self.settings = settings
         libraryPath = self.settings.value(
             f'{mode}/libraryPath',
             defaultValue=os.path.expanduser(f'~/{mode}tunes')
@@ -127,6 +127,20 @@ class Desutunes(QWidget):
             else:
                 self._model.addRecords(getMetadataForFileList(files))
 
+    def switch(self):
+        if self.mode == 'nekodesu':
+            newmode = 'inudesu'
+        else:
+            newmode = 'nekodesu'
+
+        self.settings.setValue('mode', newmode)
+        QMessageBox.information(
+            self,
+            f'Now in {newmode} mode',
+            f'Restart desutunes to activate {newmode} mode.'
+        )
+        self.close()
+
     def tableDoubleClick(self, cell):
         if not (cell.flags() & Qt.ItemIsEditable):
             row = cell.row()
@@ -178,18 +192,25 @@ class Desutunes(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    settings = QSettings('h0m54r', 'desutunes')
     if 'inu' in sys.argv or 'inudesu' in sys.argv:
-        icon = QIcon("icons/png/inuicon.png")
-        icon.addFile("icons/png/inuicon_small.png")
-        database = 'inudesutunes.db'
         mode = 'inudesu'
+    elif 'neko' in sys.argv or 'nekodesu' in sys.argv:
+        mode = 'nekodesu'
     else:
+        mode = settings.value('mode', defaultValue='nekodesu')
+
+    if mode == 'nekodesu':
         icon = QIcon("icons/png/icon.png")
         icon.addFile("icons/png/icon_small.png")
         database = 'desutunes.db'
-        mode = 'nekodesu'
+    else:
+        icon = QIcon("icons/png/inuicon.png")
+        icon.addFile("icons/png/inuicon_small.png")
+        database = 'inudesutunes.db'
+
     app.setWindowIcon(icon)
-    desutunes = Desutunes(database, mode)
+    desutunes = Desutunes(database, mode, settings)
     if 'dump' in sys.argv:
         try:
             os.rename("songlibrary.xml", "songlibrary.xml.old")
@@ -197,7 +218,7 @@ if __name__ == '__main__':
             pass
         else:
             print("Backed up songlibrary.xml to songlibrary.xml.old, "
-                  "overwriting any previous backup/")
+                  "overwriting any previous backup.")
         exportXML(desutunes._model, desutunes.libraryPath, "songlibrary.xml")
     else:
         desutunes.show()

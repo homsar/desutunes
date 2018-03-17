@@ -24,6 +24,18 @@ def setUpMenu(parent):
     )
     menu['dump'].triggered.connect(parent.dumpXML)
 
+    if parent._mode == 'nekodesu':
+        newMode = 'inu desu'
+    else:
+        newMode = 'neko desu'
+
+    menu['switchDesu'] = QtWidgets.QAction(f"{newMode} mode", parent)
+    menu['switchDesu'].setShortcut('Ctrl+M')
+    menu['switchDesu'].setStatusTip(
+        f'Switches over so manage the {newMode} library.'
+    )
+    menu['switchDesu'].triggered.connect(parent.switch)
+
     menuBar = QtWidgets.QMenuBar(parent)
     toolsMenu = menuBar.addMenu('&Tools')
     for item in menu.values():

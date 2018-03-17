@@ -49,6 +49,7 @@ from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlRecord
 
 import shutil
 import connection
+import datetime
 
 headers = [
     "ID",
@@ -110,7 +111,8 @@ class desuplayerModel(QSqlTableModel):
 
     def addRecords(self, tracks):
         failures = []
-        for track in tracks:
+        for idx, track in enumerate(tracks):
+            print(f"Copying {track.OriginalFileName} ({idx} / {len(tracks)})...")
             try:
                 if not (self.libraryPath / track.Filename.parent).is_dir():
                     (self.libraryPath / track.Filename.parent).mkdir()
@@ -130,12 +132,30 @@ class desuplayerModel(QSqlTableModel):
             self._lock_edits = True
         self.submitAll()
         if len(failures) > 0:
+            try:
+                with open(self.libraryPath / 'failures.log', 'a') as f:
+                    f.write(f"Import at {datetime.datetime.now()}:\n")
+                    for track in failures:
+                        f.write(f" - {track.Artist}, {track.Tracktitle}\n")
+                    f.write("\n")
+            except Exception as ex:
+                print(ex)
+                message = (
+                    f'Unable to open {self.libraryPath / "failures.log"} '
+                    'to write out failed track list.'
+                )
+            else:
+                message = (
+                    'List of failed tracks has been written to '
+                    f'{self.libraryPath / "failures.log"}'
+                )
             QMessageBox.warning(
                 self.parent(),
                 "Import error",
                 f'{len(failures)} track{"" if len(failures) == 1 else "s"} '
-                'could not be imported successfully'
-                )
+                f'could not be imported successfully.\n\n{message}'
+            )
+
         return True
 
     def createView(self, title):
