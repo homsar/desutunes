@@ -51,3 +51,7 @@ To import audio:
 To import iTunes XML:
 
 * Drag it into the table view
+
+To play a track:
+
+* Double-click a read-only field (ID or filename)
