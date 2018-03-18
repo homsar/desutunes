@@ -46,6 +46,9 @@ class Desutunes(QWidget):
         self.setAcceptDrops(True)
         self._tableView = self._model.createView("desutunes database")
         self._tableView.doubleClicked.connect(self.tableDoubleClick)
+        self._tableView.horizontalHeader().sectionClicked.connect(
+            self.tableColumnHeaderClick
+        )
         self._player = AudioPlayer()
         boxes = QVBoxLayout()
         boxes.addWidget(self._player)
@@ -156,6 +159,9 @@ class Desutunes(QWidget):
                     self._model.data(self._model.index(row, col("Artist")))
                     ))
             self._player.play()
+
+    def tableColumnHeaderClick(self, index):
+        self._model.resort(index)
 
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Delete):

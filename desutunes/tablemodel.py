@@ -83,6 +83,9 @@ class desuplayerModel(QSqlTableModel):
             self.setHeaderData(index, Qt.Horizontal, name)
         self.libraryPath = libraryPath
 
+        self.sortColumn = -1
+        self.sortOrder = None
+
     def data(self, item, role=Qt.DisplayRole):
         if role == Qt.BackgroundRole:
             fileName = super().data(self.index(item.row(), col("File name")),
@@ -169,6 +172,14 @@ class desuplayerModel(QSqlTableModel):
         result = result and self.submitAll()
         result = result and self.select()
         return result
+
+    def resort(self, column):
+        self.sortColumn = column
+        if column != self.sortColumn or self.sortOrder == Qt.DescendingOrder:
+            self.sortOrder = Qt.AscendingOrder
+        else:
+            self.sortOrder = Qt.DescendingOrder
+        self.sort(column, self.sortOrder)
 
 
 def loadDatabase(database, libraryPath):
