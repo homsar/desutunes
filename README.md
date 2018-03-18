@@ -36,12 +36,11 @@ To run desutunes:
 python desutunes/desutunes.py
 ```
 
-To run in Inu Desu mode:
-```bash
-python desutunes/desutunes.py inu
-```
+To run in Inu Desu mode use the Tools menu to switch the library over.
 
 To dump the library XML out, choose "Dump XML..." from the Tools menu.
+
+If the Tools menu isn't clickable, defocus and refocus the desutunes window. This is a limitation of Qt on macOS.
 
 
 To import audio:
