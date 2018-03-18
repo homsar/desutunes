@@ -48,7 +48,7 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtSql import QSqlTableModel, QSqlDatabase, QSqlRecord
 
 import shutil
-import connection
+from . import connection
 import datetime
 
 headers = [

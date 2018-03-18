@@ -1,10 +1,9 @@
 import plistlib
 import pathlib
 from PyQt5.QtCore import QFileInfo
-from processfile import metadata, part
+from .processfile import metadata, part, canonicalFileName, processFile
 from urllib.parse import urlparse, unquote
 from datetime import datetime, timezone
-from processfile import canonicalFileName, processFile
 
 _itunes_headers = {
     -1: 'Track ID',

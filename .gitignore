@@ -2,3 +2,5 @@
 __pycache__
 *~
 songlibrary.xml
+**.DS_Store
+**.pytest_cache

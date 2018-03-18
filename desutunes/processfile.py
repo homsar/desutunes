@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QFileInfo, QDir
 from collections import namedtuple
 from functools import partial
-from tablemodel import headers
+from .tablemodel import headers
 from mutagen import easyid3, id3, mp3, easymp4, mp4, aac, flac
 from random import choice
 from datetime import datetime, timezone
@@ -105,7 +105,7 @@ def sanitize(text):
 
 
 def canonicalFileName(id, artist, title, extension):
-    return Path(sanitize(artist)) /f'{sanitize(title)} ({id}).{extension}'
+    return Path(sanitize(artist)) / f'{sanitize(title)} ({id}).{extension}'
 
 
 def getMetadataForFileList(filenames):

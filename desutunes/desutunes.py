@@ -8,11 +8,11 @@ from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QFileDialog, QMessageBox, QWidget, QVBoxLayout
     )
-from tablemodel import loadDatabase, col
-from processfile import getMetadataForFileList
-from processitunes import handleXML, exportXML
-from player import AudioPlayer
-from menu import setUpMenu
+from .tablemodel import loadDatabase, col
+from .processfile import getMetadataForFileList
+from .processitunes import handleXML, exportXML
+from .player import AudioPlayer
+from .menu import setUpMenu
 from shutil import move
 
 
