@@ -33,7 +33,7 @@ Clone the repository, install Python 3.6 and the dependencies in `requirements.t
 To run desutunes:
 
 ```bash
-python desutunes/desutunes.py
+python -m desutunes.desutunes
 ```
 
 To run in Inu Desu mode use the Tools menu to switch the library over.
