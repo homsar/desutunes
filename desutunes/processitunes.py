@@ -34,6 +34,8 @@ def handleXML(fileName):
         if not track['Location'].startswith('file'):
             continue
         inMyriad = track.get('Episode', 'Yes')
+
+        # The library has some typos, but the first 10 characters are reliable
         if inMyriad.lower().startswith('not in myr'):
             inMyriad = "NO"
 
@@ -43,14 +45,23 @@ def handleXML(fileName):
         originalFileName = unquote(urlparse(track['Location']).path)
         suffix = pathlib.Path(originalFileName).suffix[1:]
         newFileName = canonicalFileName(id, artist, title, suffix)
+
+        # Latest versions of iTunes don't export Description in XML dumps
+        # We have to examine the file directly
+        # Composer should be in the XML, but check the file just in case
+        # since we've probably grabbed its metadata anyway
         label = track.get('Description', '')
-        if label == '':
+        composer = track.get('Composer', '')
+        if not label or not composer:
             try:
                 file_metadata = processFile(originalFileName,
                                             QFileInfo(originalFileName))[0]
-                label = file_metadata.Label
+                if not label:
+                    label = file_metadata.Label
+                if not composer:
+                    composer = file_metadata.Composer
             except Exception as ex:
-                print(ex)
+                print("Unable to get extra metadata for", originalFileName)
 
         track_metadata = metadata(
             ID=id,
@@ -63,7 +74,7 @@ def handleXML(fileName):
             Role=role,
             Rolequalifier=rolequal,
             Artist=artist,
-            Composer=track.get('Composer', ''),
+            Composer=composer,
             Label=label,
             InMyriad=inMyriad,
             Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")

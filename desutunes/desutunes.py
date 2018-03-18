@@ -128,7 +128,7 @@ class Desutunes(QWidget):
                 self._model.addRecords(getMetadataForFileList(files))
 
     def switch(self):
-        if self.mode == 'nekodesu':
+        if self._mode == 'nekodesu':
             newmode = 'inudesu'
         else:
             newmode = 'nekodesu'

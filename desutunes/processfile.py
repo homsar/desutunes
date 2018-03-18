@@ -182,7 +182,7 @@ def processm4a(filename):
     id = random_id()
 
     f = mp4.MP4(filename)
-    composer = f.get('©wrt', _blank)
+    composer = f.get('©wrt', _blank)[0]
     return [metadata(
         ID=id,
         OriginalFileName=filename,
