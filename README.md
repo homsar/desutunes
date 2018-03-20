@@ -55,3 +55,7 @@ To import iTunes XML:
 To play a track:
 
 * Double-click a read-only field (ID or filename)
+
+## Tests
+
+Test suite is under construction. Run `pytest` from the repository root to run them.
