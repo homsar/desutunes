@@ -58,4 +58,6 @@ To play a track:
 
 ## Tests
 
+[![Build Status](https://travis-ci.org/homsar/desutunes.svg?branch=master)](https://travis-ci.org/homsar/desutunes)
+
 Test suite is under construction. Run `pytest` from the repository root to run them.
