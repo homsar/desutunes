@@ -126,7 +126,7 @@ def getMetadataForFileList(filenames):
                      )]))
         elif info.isFile() and info.isReadable():
             print(filename)
-            metadata.extend(processFile(filename, info))
+            metadata.extend(processFile(filename))
     return metadata
 
 
@@ -232,13 +232,13 @@ def processflac(filename):
         )]
 
 
-def processFile(filename, info):
-    suffix = info.suffix().lower()
+def processFile(filename):
+    suffix = Path(filename).suffix.lower()
     processors = {
-        'mp3': processid3,
-        'aac': partial(processid3, audioengine=aac.AAC),
-        'm4a': processm4a,
-        'flac': processflac
+        '.mp3': processid3,
+        '.aac': partial(processid3, audioengine=aac.AAC),
+        '.m4a': processm4a,
+        '.flac': processflac
         }
     if suffix not in processors:
         return []
