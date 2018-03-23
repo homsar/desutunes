@@ -66,7 +66,7 @@ def role_detail(role):
             r'(?P<rolepre>(rebroadcast)?) ?'
             r'\b(?P<role>'
 
-            r'(ED|OP|(character|image) song\b|'
+            r'((ED|OP)(?=(\d|\b))|(character|image) song\b|'
             r'(insert (track|song)\b)|ins|'
             r'(main )?theme|bgm|ost))'
             r' ?'
