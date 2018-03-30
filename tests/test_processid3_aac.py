@@ -1,7 +1,7 @@
 # Tests the processid3 function from processfile.py for mp3s
 
 from desutunes.processfile import processid3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from mutagen import aac
 import os
 import pathlib
@@ -12,9 +12,9 @@ path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
 class File_aac():
     def __init__(self):
         self.file = str(path / "test_audio.aac")
-        self.time_before_start = datetime.now()
+        self.time_before_start = datetime.now(timezone.utc)
         self.result = processid3(self.file, audioengine=aac.AAC)
-        self.time_after_end = datetime.now()
+        self.time_after_end = datetime.now(timezone.utc)
         assert len(self.result) == 1
         self.metadata = self.result[0]
 
@@ -60,7 +60,8 @@ class Test_processid3_AAC:
         assert file_aac.metadata.InMyriad == 'NO'
 
     def test_time(self, file_aac):
-        time_read = datetime.strptime(file_aac.metadata.Dateadded,
-                                      "%Y-%m-%d %H:%M")
+        time_read = datetime.strptime(
+            file_aac.metadata.Dateadded,
+            "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
         assert file_aac.time_before_start < time_read + timedelta(minutes=1)
         assert time_read < file_aac.time_after_end

@@ -1,7 +1,7 @@
 # Tests the processid3 function from processfile.py for mp3s
 
 from desutunes.processfile import processid3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import pathlib
 import pytest
@@ -11,9 +11,9 @@ path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
 class File_mp3():
     def __init__(self):
         self.file = str(path / "test_audio.mp3")
-        self.time_before_start = datetime.now()
+        self.time_before_start = datetime.now(timezone.utc)
         self.result = processid3(self.file)
-        self.time_after_end = datetime.now()
+        self.time_after_end = datetime.now(timezone.utc)
         assert len(self.result) == 1
         self.metadata = self.result[0]
 
@@ -59,7 +59,8 @@ class Test_processid3_MP3:
         assert file_mp3.metadata.InMyriad == 'NO'
 
     def test_time(self, file_mp3):
-        time_read = datetime.strptime(file_mp3.metadata.Dateadded,
-                                      "%Y-%m-%d %H:%M")
+        time_read = datetime.strptime(
+            file_mp3.metadata.Dateadded,
+            "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
         assert file_mp3.time_before_start < time_read + timedelta(minutes=1)
         assert time_read < file_mp3.time_after_end

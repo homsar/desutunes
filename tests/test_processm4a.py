@@ -1,7 +1,7 @@
 # Tests the processm4a function from processfile.py
 
 from desutunes.processfile import processm4a
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import pathlib
 import pytest
@@ -11,9 +11,9 @@ path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
 class File_m4a():
     def __init__(self):
         self.file = str(path / "test_audio.m4a")
-        self.time_before_start = datetime.now()
+        self.time_before_start = datetime.now(timezone.utc)
         self.result = processm4a(self.file)
-        self.time_after_end = datetime.now()
+        self.time_after_end = datetime.now(timezone.utc)
         assert len(self.result) == 1
         self.metadata = self.result[0]
 
@@ -59,7 +59,8 @@ class Test_processid3_M4A:
         assert file_m4a.metadata.InMyriad == 'NO'
 
     def test_time(self, file_m4a):
-        time_read = datetime.strptime(file_m4a.metadata.Dateadded,
-                                      "%Y-%m-%d %H:%M")
+        time_read = datetime.strptime(
+            file_m4a.metadata.Dateadded,
+            "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
         assert file_m4a.time_before_start < time_read + timedelta(minutes=1)
         assert time_read < file_m4a.time_after_end
