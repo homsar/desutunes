@@ -90,8 +90,8 @@ def part(trackTitle):
     if role_components['rolepre'] == '' or role_components['rolepost'] == '':
         rolequal = role_components['rolepre'] + role_components['rolepost']
     else:
-        rolequal = ', '.join(role_components['rolepre'],
-                             role_components['rolepost'])
+        rolequal = ', '.join((role_components['rolepre'],
+                             role_components['rolepost']))
     if len(role_components['role']) == 2:
         role = role_components['role'].upper()
     else:
@@ -144,8 +144,6 @@ def processid3(filename, audioengine=mp3.MP3):
             if field in case_map:
                 label = f_complex[case_map[field]].text[0]
                 break
-        else:
-            return []
 
     artist = f.get('artist', _unknown)[0]
     af = audioengine(filename)
