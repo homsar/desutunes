@@ -44,7 +44,7 @@ class Test_processid3_M4A:
     def test_anime(self, file_m4a):
         assert file_m4a.metadata.Anime == 'Spam'
         assert file_m4a.metadata.Role == 'ED'
-        assert file_m4a.metadata.Rolequalifier == 'episode 3'
+        assert file_m4a.metadata.Rolequalifier == 'rebroadcast, episode 3'
 
     def test_artist(self, file_m4a):
         assert file_m4a.metadata.Artist == 'Tachibana Kanade'

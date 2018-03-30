@@ -54,7 +54,7 @@ class Test_processid3_AAC:
         assert file_aac.metadata.Composer == '107.9FM'
 
     def test_label(self, file_aac):
-        assert file_aac.metadata.Label == 'h0m54r records'
+        assert file_aac.metadata.Label == ''
 
     def test_inmyriad(self, file_aac):
         assert file_aac.metadata.InMyriad == 'NO'
