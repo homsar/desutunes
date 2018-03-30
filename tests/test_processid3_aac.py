@@ -30,8 +30,7 @@ class Test_processid3_AAC:
 
     def test_new_file_name(self, file_aac):
         assert str(file_aac.metadata.Filename)[:-21] == (
-            'Tachibana Kanade/Test AAC file ('
-        )
+            'Tachibana Kanade/Test AAC file (')
         assert str(file_aac.metadata.Filename)[-5:] == ').aac'
 
     def test_title(self, file_aac):
@@ -65,5 +64,3 @@ class Test_processid3_AAC:
                                       "%Y-%m-%d %H:%M")
         assert file_aac.time_before_start < time_read + timedelta(minutes=1)
         assert time_read < file_aac.time_after_end
-
-

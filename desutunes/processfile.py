@@ -8,9 +8,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 import re
 
-metadata = namedtuple("metadata",
-                      [header.replace(' ', '')
-                       for header in headers + ['OriginalFileName']])
+metadata = namedtuple(
+    "metadata",
+    [header.replace(' ', '') for header in headers + ['OriginalFileName']])
 _blank = [""]
 _unknown = ["Unknown Artist"]
 _nullroledetail = {'anime': '', 'role': '', 'rolepre': '', 'rolepost': ''}
@@ -32,7 +32,7 @@ def split_id3_title(id3_title):
     role = None
 
     bracket_depth = 0
-    for i in range(1, len(id3_title)+1):
+    for i in range(1, len(id3_title) + 1):
         char = id3_title[-i]
         if char == ')':
             bracket_depth += 1
@@ -41,7 +41,7 @@ def split_id3_title(id3_title):
 
         if bracket_depth == 0:
             if i != 1:
-                role = id3_title[len(id3_title)-i:]
+                role = id3_title[len(id3_title) - i:]
             break
 
     if role:
@@ -65,7 +65,6 @@ def role_detail(role):
             r'^(?P<anime>.*?) ?\b'
             r'(?P<rolepre>(rebroadcast)?) ?'
             r'\b(?P<role>'
-
             r'((ED|OP)(?=(\d|\b))|(character|image) song\b|'
             r'(insert (track|song)\b)|ins|'
             r'(main )?theme|bgm|ost))'
@@ -73,7 +72,7 @@ def role_detail(role):
             r'(?P<rolepost>.*)$',
             role,
             flags=re.IGNORECASE,
-            ).groupdict()
+        ).groupdict()
     except Exception as ex:
         return {**_nullroledetail, **{'rolepost': role}}
 
@@ -119,11 +118,12 @@ def getMetadataForFileList(filenames):
             print(filename)
             dir = QDir(filename)
             print(dir.entryList(QDir.AllEntries | QDir.NoDotAndDotDot))
-            metadata.extend(getMetadataForFileList(
-                    [i.filePath()
-                     for i in dir.entryInfoList(
-                             QDir.AllEntries | QDir.NoDotAndDotDot
-                     )]))
+            metadata.extend(
+                getMetadataForFileList([
+                    i.filePath()
+                    for i in dir.entryInfoList(QDir.AllEntries
+                                               | QDir.NoDotAndDotDot)
+                ]))
         elif info.isFile() and info.isReadable():
             print(filename)
             metadata.extend(processFile(filename))
@@ -138,8 +138,7 @@ def processid3(filename, audioengine=mp3.MP3):
     label = f.get('label', _blank)[0]
     if not label:
         f_complex = id3.ID3(filename)
-        case_map = {name.lower(): name
-                    for name in f_complex}
+        case_map = {name.lower(): name for name in f_complex}
         to_try = ['tit3', 'txxx:subtitle', 'txxx:label', 'txxx:description']
         for field in to_try:
             if field in case_map:
@@ -152,22 +151,23 @@ def processid3(filename, audioengine=mp3.MP3):
     af = audioengine(filename)
     id = random_id()
 
-    return [metadata(
-        ID=id,
-        OriginalFileName=filename,
-        Filename=canonicalFileName(id, artist, title, filename[-3:]),
-        Tracktitle=title,
-        Album=f.get('album', _blank)[0],
-        Length=int(af.info.length * 1000),
-        Anime=anime,
-        Role=role,
-        Rolequalifier=rolequal,
-        Artist=f.get('artist', _blank)[0],
-        Composer=f.get('composer', _blank)[0],
-        Label=label,
-        InMyriad="NO",
-        Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-        )]
+    return [
+        metadata(
+            ID=id,
+            OriginalFileName=filename,
+            Filename=canonicalFileName(id, artist, title, filename[-3:]),
+            Tracktitle=title,
+            Album=f.get('album', _blank)[0],
+            Length=int(af.info.length * 1000),
+            Anime=anime,
+            Role=role,
+            Rolequalifier=rolequal,
+            Artist=f.get('artist', _blank)[0],
+            Composer=f.get('composer', _blank)[0],
+            Label=label,
+            InMyriad="NO",
+            Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
+    ]
 
 
 def processm4a(filename):
@@ -183,22 +183,23 @@ def processm4a(filename):
 
     f = mp4.MP4(filename)
     composer = f.get('©wrt', _blank)[0]
-    return [metadata(
-        ID=id,
-        OriginalFileName=filename,
-        Filename=canonicalFileName(id, fn_artist, title, 'm4a'),
-        Tracktitle=title,
-        Album=album,
-        Length=int(f.info.length * 1000),
-        Anime=anime,
-        Role=role,
-        Rolequalifier=rolequal,
-        Artist=artist,
-        Composer=composer,
-        Label=label,
-        InMyriad="NO",
-        Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-        )]
+    return [
+        metadata(
+            ID=id,
+            OriginalFileName=filename,
+            Filename=canonicalFileName(id, fn_artist, title, 'm4a'),
+            Tracktitle=title,
+            Album=album,
+            Length=int(f.info.length * 1000),
+            Anime=anime,
+            Role=role,
+            Rolequalifier=rolequal,
+            Artist=artist,
+            Composer=composer,
+            Label=label,
+            InMyriad="NO",
+            Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
+    ]
 
 
 def processflac(filename):
@@ -214,22 +215,23 @@ def processflac(filename):
     fn_artist = artist if artist else 'Unknown Artist'
     id = random_id()
 
-    return [metadata(
-        ID=id,
-        OriginalFileName=filename,
-        Filename=canonicalFileName(id, artist, title, 'flac'),
-        Tracktitle=title,
-        Album=album,
-        Length=int(f.info.length * 1000),
-        Anime=anime,
-        Role=role,
-        Rolequalifier=rolequal,
-        Artist=artist,
-        Composer=f.get('composer', _blank)[0],
-        Label=label,
-        InMyriad="NO",
-        Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-        )]
+    return [
+        metadata(
+            ID=id,
+            OriginalFileName=filename,
+            Filename=canonicalFileName(id, artist, title, 'flac'),
+            Tracktitle=title,
+            Album=album,
+            Length=int(f.info.length * 1000),
+            Anime=anime,
+            Role=role,
+            Rolequalifier=rolequal,
+            Artist=artist,
+            Composer=f.get('composer', _blank)[0],
+            Label=label,
+            InMyriad="NO",
+            Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
+    ]
 
 
 def processFile(filename):
@@ -239,7 +241,7 @@ def processFile(filename):
         '.aac': partial(processid3, audioengine=aac.AAC),
         '.m4a': processm4a,
         '.flac': processflac
-        }
+    }
     if suffix not in processors:
         return []
     else:

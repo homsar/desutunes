@@ -13,15 +13,13 @@ def setUpMenu(parent):
     menu['libraryLocation'] = QtWidgets.QAction("Set &library path...", parent)
     menu['libraryLocation'].setShortcut('Ctrl+L')
     menu['libraryLocation'].setStatusTip(
-        'Choose a location to hold the music library'
-    )
+        'Choose a location to hold the music library')
     menu['libraryLocation'].triggered.connect(parent.libraryLocation)
 
     menu['dump'] = QtWidgets.QAction("Dump &XML...", parent)
     menu['dump'].setShortcut('Ctrl+X')
     menu['dump'].setStatusTip(
-        'Export the library as an iTunes XML file to upload to nkd.su'
-    )
+        'Export the library as an iTunes XML file to upload to nkd.su')
     menu['dump'].triggered.connect(parent.dumpXML)
 
     if parent._mode == 'nekodesu':
@@ -32,8 +30,7 @@ def setUpMenu(parent):
     menu['switchDesu'] = QtWidgets.QAction(f"{newMode} mode", parent)
     menu['switchDesu'].setShortcut('Ctrl+M')
     menu['switchDesu'].setStatusTip(
-        f'Switches over so manage the {newMode} library.'
-    )
+        f'Switches over so manage the {newMode} library.')
     menu['switchDesu'].triggered.connect(parent.switch)
 
     menuBar = QtWidgets.QMenuBar(parent)

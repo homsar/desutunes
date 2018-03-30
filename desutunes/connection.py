@@ -38,28 +38,25 @@
 #
 ############################################################################
 
-
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 
 
 def initDatabase(db):
     query = QSqlQuery(db)
-    query.exec_(
-        "create table tracks(id text primary key, "
-        "filename text, "
-        "tracktitle text, "
-        "artist text, "
-        "album text, "
-        "length integer, "
-        "anime text, "
-        "role text, "
-        "rolequant text, "
-        "label text, "
-        "composer text, "
-        "inmyriad text, "
-        "dateadded text)"
-        )
+    query.exec_("create table tracks(id text primary key, "
+                "filename text, "
+                "tracktitle text, "
+                "artist text, "
+                "album text, "
+                "length integer, "
+                "anime text, "
+                "role text, "
+                "rolequant text, "
+                "label text, "
+                "composer text, "
+                "inmyriad text, "
+                "dateadded text)")
 
     return True
 
@@ -73,8 +70,7 @@ def createConnection(database):
             "Unable to establish a database connection.\n"
             "This example needs SQLite support. Please read the Qt SQL "
             "driver documentation for information how to build it.\n\n"
-            "Click Cancel to exit.",
-            QMessageBox.Cancel)
+            "Click Cancel to exit.", QMessageBox.Cancel)
         return False
 
     if 'tracks' not in db.tables():

@@ -42,12 +42,11 @@
 
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
-from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel,
-                             QPushButton, QSlider, QStyle, QWidget)
+from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
+                             QSlider, QStyle, QWidget)
 
 
 class AudioPlayer(QWidget):
-
     def __init__(self, parent=None):
         super(AudioPlayer, self).__init__(parent)
 
@@ -96,11 +95,11 @@ class AudioPlayer(QWidget):
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            self.playButton.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPause))
+            self.playButton.setIcon(self.style().standardIcon(
+                QStyle.SP_MediaPause))
         else:
-            self.playButton.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPlay))
+            self.playButton.setIcon(self.style().standardIcon(
+                QStyle.SP_MediaPlay))
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)

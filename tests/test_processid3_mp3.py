@@ -29,8 +29,7 @@ class Test_processid3_MP3:
 
     def test_new_file_name(self, file_mp3):
         assert str(file_mp3.metadata.Filename)[:-21] == (
-            'Tachibana Kanade/Test MP3 file ('
-        )
+            'Tachibana Kanade/Test MP3 file (')
         assert str(file_mp3.metadata.Filename)[-5:] == ').mp3'
 
     def test_title(self, file_mp3):

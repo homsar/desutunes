@@ -29,8 +29,7 @@ class Test_processid3_M4A:
 
     def test_new_file_name(self, file_m4a):
         assert str(file_m4a.metadata.Filename)[:-21] == (
-            'Tachibana Kanade/Test M4A file ('
-        )
+            'Tachibana Kanade/Test M4A file (')
         assert str(file_m4a.metadata.Filename)[-5:] == ').m4a'
 
     def test_title(self, file_m4a):

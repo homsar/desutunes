@@ -29,8 +29,7 @@ class Test_processflac:
 
     def test_new_file_name(self, file_flac):
         assert str(file_flac.metadata.Filename)[:-22] == (
-            'Tachibana Kanade/Test FLAC file ('
-        )
+            'Tachibana Kanade/Test FLAC file (')
         assert str(file_flac.metadata.Filename)[-6:] == ').flac'
 
     def test_title(self, file_flac):

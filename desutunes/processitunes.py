@@ -76,8 +76,7 @@ def handleXML(fileName):
             Composer=composer,
             Label=label,
             InMyriad=inMyriad,
-            Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-            )
+            Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))
         tracks.append(track_metadata)
     print(f'Got metadata for {len(tracks)} tracks, out of '
           f'{len(plist["Tracks"])} in the iTunes XML.')
@@ -86,37 +85,34 @@ def handleXML(fileName):
 
 def exportXML(model, libraryPath, fileName):
     tracks = {}
-    episode_map = {
-        'NO': 'NOT IN MYRIAD',
-        'Yes': ''
-        }
+    episode_map = {'NO': 'NOT IN MYRIAD', 'Yes': ''}
     for i in range(model.rowCount()):
         r = model.record(i)
         tracks[str(i)] = {
-                'Track ID': str(i+1),
-                'Persistent ID': r.value('ID'),
-                'Location': (libraryPath / r.value('Filename')).as_uri(),
-                'Name': '{} ({} {}{}{})'.format(
-                    r.value('Tracktitle'),
-                    r.value('Anime'),
-                    r.value('Role'),
-                    '' if r.value('Rolequant') == '' else ' ',
-                    r.value('Rolequant')
-                    ),
-                'Artist': r.value('Artist'),
-                'Album': r.value('Album'),
-                'Total Time': r.value('Length') / 1000,
-                'Description': r.value('Label'),
-                'Composer': r.value('Composer'),
-                'Episode': episode_map.get(
-                    r.value('InMyriad'),
-                    r.value('InMyriad')
-                    ),
-                'Date Added': datetime.strptime(
-                    r.value('DateAdded'),
-                    "%Y-%m-%d %H:%M"
-                    )
-                }
+            'Track ID':
+            str(i + 1),
+            'Persistent ID':
+            r.value('ID'),
+            'Location': (libraryPath / r.value('Filename')).as_uri(),
+            'Name':
+            '{} ({} {}{}{})'.format(
+                r.value('Tracktitle'), r.value('Anime'), r.value('Role'), ''
+                if r.value('Rolequant') == '' else ' ', r.value('Rolequant')),
+            'Artist':
+            r.value('Artist'),
+            'Album':
+            r.value('Album'),
+            'Total Time':
+            r.value('Length') / 1000,
+            'Description':
+            r.value('Label'),
+            'Composer':
+            r.value('Composer'),
+            'Episode':
+            episode_map.get(r.value('InMyriad'), r.value('InMyriad')),
+            'Date Added':
+            datetime.strptime(r.value('DateAdded'), "%Y-%m-%d %H:%M")
+        }
     try:
         with open(fileName, 'wb') as f:
             plistlib.dump({'Tracks': tracks}, f)

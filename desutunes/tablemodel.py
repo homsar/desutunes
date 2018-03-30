@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 ############################################################################
 #
 # Copyright (C) 2013 Riverbank Computing Limited.
@@ -41,7 +40,6 @@
 #
 ############################################################################
 
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox, QTableView
 from PyQt5.QtGui import QBrush, QColor
@@ -52,20 +50,9 @@ from . import connection
 import datetime
 
 headers = [
-    "ID",
-    "File name",
-    "Track title",
-    "Artist",
-    "Album",
-    "Length",
-    "Anime",
-    "Role",
-    "Role qualifier",
-    "Label",
-    "Composer",
-    "In Myriad",
-    "Date added"
-    ]
+    "ID", "File name", "Track title", "Artist", "Album", "Length", "Anime",
+    "Role", "Role qualifier", "Label", "Composer", "In Myriad", "Date added"
+]
 col = headers.index
 
 
@@ -88,26 +75,27 @@ class desuplayerModel(QSqlTableModel):
 
     def data(self, item, role=Qt.DisplayRole):
         if role == Qt.BackgroundRole:
-            fileName = super().data(self.index(item.row(), col("File name")),
-                                    Qt.DisplayRole)
+            fileName = super().data(
+                self.index(item.row(), col("File name")), Qt.DisplayRole)
             if not fileName:
                 return super().data(item, role)
             file = self.libraryPath / fileName
             if not file.is_file():
                 return QBrush(QColor(255, 128, 128))
-            elif (super().data(self.index(item.row(), col("In Myriad")),
-                               Qt.DisplayRole) in ["NO", "AWAITING EDITS"]
-                  or super().data(self.index(item.row(), col("Label")),
-                                  Qt.DisplayRole) == ''
-                  or super().data(self.index(item.row(), col("Composer")),
-                                  Qt.DisplayRole) == ''):
+            elif (super().data(
+                    self.index(item.row(), col("In Myriad")),
+                    Qt.DisplayRole) in ["NO", "AWAITING EDITS"]
+                  or super().data(
+                      self.index(item.row(), col("Label")),
+                      Qt.DisplayRole) == '' or super().data(
+                          self.index(item.row(), col("Composer")),
+                          Qt.DisplayRole) == ''):
                 return QBrush(QColor(255, 255, 128))
         return super().data(item, role)
 
     def flags(self, index):
-        if (headers[index.column()] in (
-                "ID", "File name", "Length", "Date added"
-        ) and self._lock_edits):
+        if (headers[index.column()] in ("ID", "File name", "Length",
+                                        "Date added") and self._lock_edits):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
@@ -115,7 +103,8 @@ class desuplayerModel(QSqlTableModel):
     def addRecords(self, tracks):
         failures = []
         for idx, track in enumerate(tracks):
-            print(f"Copying {track.OriginalFileName} ({idx} / {len(tracks)})...")
+            print(
+                f"Copying {track.OriginalFileName} ({idx} / {len(tracks)})...")
             try:
                 if not (self.libraryPath / track.Filename.parent).is_dir():
                     (self.libraryPath / track.Filename.parent).mkdir()
@@ -145,19 +134,14 @@ class desuplayerModel(QSqlTableModel):
                 print(ex)
                 message = (
                     f'Unable to open {self.libraryPath / "failures.log"} '
-                    'to write out failed track list.'
-                )
+                    'to write out failed track list.')
             else:
-                message = (
-                    'List of failed tracks has been written to '
-                    f'{self.libraryPath / "failures.log"}'
-                )
+                message = ('List of failed tracks has been written to '
+                           f'{self.libraryPath / "failures.log"}')
             QMessageBox.warning(
-                self.parent(),
-                "Import error",
+                self.parent(), "Import error",
                 f'{len(failures)} track{"" if len(failures) == 1 else "s"} '
-                f'could not be imported successfully.\n\n{message}'
-            )
+                f'could not be imported successfully.\n\n{message}')
 
         return True
 
