@@ -1,15 +1,12 @@
 # Tests the processm4a function from processfile.py
 
-from desutunes.processfile import processm4a
 from datetime import datetime, timedelta, timezone
-import os
-import pathlib
 import pytest
-from tests.path import audio_path
+from desutunes.processfile import processm4a
 
 
 class File_m4a():
-    def __init__(self):
+    def __init__(self, audio_path):
         self.file = str(audio_path / "test_audio.m4a")
         self.time_before_start = datetime.now(timezone.utc)
         self.result = processm4a(self.file)
@@ -19,8 +16,8 @@ class File_m4a():
 
 
 @pytest.fixture
-def file_m4a():
-    return File_m4a()
+def file_m4a(audio_path):
+    return File_m4a(audio_path)
 
 
 class Test_processid3_M4A:
