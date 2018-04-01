@@ -5,12 +5,12 @@ from datetime import datetime, timedelta, timezone
 import os
 import pathlib
 import pytest
-path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+from tests.path import audio_path
 
 
 class File_m4a():
     def __init__(self):
-        self.file = str(path / "test_audio.m4a")
+        self.file = str(audio_path / "test_audio.m4a")
         self.time_before_start = datetime.now(timezone.utc)
         self.result = processm4a(self.file)
         self.time_after_end = datetime.now(timezone.utc)

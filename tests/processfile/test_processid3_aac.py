@@ -6,12 +6,12 @@ from mutagen import aac
 import os
 import pathlib
 import pytest
-path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+from tests.path import audio_path
 
 
 class File_aac():
     def __init__(self):
-        self.file = str(path / "test_audio.aac")
+        self.file = str(audio_path / "test_audio.aac")
         self.time_before_start = datetime.now(timezone.utc)
         self.result = processid3(self.file, audioengine=aac.AAC)
         self.time_after_end = datetime.now(timezone.utc)
