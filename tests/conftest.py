@@ -12,6 +12,8 @@ def audio_path():
 
 @pytest.fixture(scope="module")
 def database_model(tmpdir_factory):
+    import pathlib
     from desutunes.tablemodel import loadDatabase
 
-    return loadDatabase("tesutotunes.db", tmpdir_factory.mktemp('tesutotunes'))
+    return loadDatabase("tesutotunes.db",
+                        pathlib.Path(tmpdir_factory.mktemp('tesutotunes')))
