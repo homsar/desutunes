@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import enum
+from pathlib import Path
 
 from sqlalchemy import Column, String, Integer, Float, DateTime, Enum
 from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint
@@ -9,8 +10,9 @@ from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from .settinsg import DATABASE_LOCATION, LIBRARY_LOCATION
+
 Base = declarative_base()
-database_location = 'sqlite:///desutunes.sqlite'
 
 class Track(Base):
     '''A single track, that has played a role in an anime.'''
@@ -29,6 +31,7 @@ class Track(Base):
     year = Column(Integer, nullable=True)
     label_id = Column(Integer, ForeignKey('label.id'), nullable=True)
 
+    tracktitle = relationship("PronouncableThing")
     artist = relationship("MetaArtist",
                           foreign_keys=[artist_id])
     album = relationship("Album", back_populates="tracks")
@@ -38,6 +41,14 @@ class Track(Base):
     roles = relationship("Role", back_populates="track")
 
     __table_args__ = (UniqueConstraint('itunes_id', name='_unique_itunesid'),)
+
+    @property
+    def file(self):
+        return LIBRARY_LOCATION / self.filename
+
+    @property
+    def is_in_library(self):
+        return self.file.exists()
 
 
 class Artist(Base):
@@ -238,7 +249,7 @@ class MetaArtistComponent(Base):
 
 
 
-engine = create_engine(database_location, future=True)
+engine = create_engine(DATABASE_LOCATION, future=True)
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 

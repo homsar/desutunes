@@ -1,3 +1,4 @@
+import logging
 import plistlib
 import pathlib
 from PyQt5.QtCore import QFileInfo
@@ -18,7 +19,15 @@ def handleXML(fileName):
     tracks = []
 
     for idx, (tid, track) in enumerate(plist['Tracks'].items()):
+        if 'Location' not in track:
+            logging.warning('%s (%s) does not have a location! Skipping.',
+                            track.get('Name', '(no name)'),
+                            track['Persistent ID'])
+            continue
         if not track['Location'].startswith('file'):
+            logging.warning("%s (%s)'s location is not a file! Skipping.",
+                            track.get('Name', '(no name)'),
+                            track['Persistent ID'])
             continue
         inMyriad = track.get('Episode', 'Yes')
 
@@ -48,7 +57,8 @@ def handleXML(fileName):
                 if not composer:
                     composer = file_metadata.Composer
             except Exception as ex:
-                print("Unable to get extra metadata for", originalFileName)
+                logging.warning("Unable to get extra metadata for %s",
+                                originalFileName)
 
         if (year := track.get('Year')) is not None:
             year = int(year)
@@ -69,8 +79,10 @@ def handleXML(fileName):
             Dateadded=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
         )
         tracks.append(track_metadata)
-    print(f'Got metadata for {len(tracks)} tracks, out of '
-          f'{len(plist["Tracks"])} in the iTunes XML.')
+    logging.info(
+        'Got metadata for %d tracks, out of %d in the iTunes XML.',
+        len(tracks), len(plist['Tracks'])
+    )
     return tracks
 
 

@@ -67,7 +67,7 @@ def parse_role(role_text):
         r'(?P<rolepre>(rebroadcast)?) ?'
         r'\b(?P<role>'
         r'((ED|OP)(?=(\d|\b))|(character|image) song\b|'
-        r'(insert (track|song)\b)|ins|'
+        r'(insert (track|song)\b)|ins$|'
         r'(main )?theme|bgm|ost))'
         r' ?'
         r'(?P<rolepost>.*)$',

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import logging
 from pathlib import Path
 
 from .processitunes import handleXML
-from .processfile import processFile
+from .processfile import getMetadataForFileList
 from .metadata_to_records import add_records_from_metadata
 
 
@@ -14,7 +15,7 @@ def import_files(filenames: list[str]) -> None:
         if suffix in ['.xml', '.plist']:
             records.extend(handleXML(filename))
         else:
-            records.extend(processFile(filename))
+            records.extend(getMetadataForFileList([filename]))
 
     add_records_from_metadata(records)
 
@@ -25,7 +26,11 @@ def main() -> None:
     parser = ArgumentParser()
 
     parser.add_argument('filenames', metavar='filename', nargs='+')
+    parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     import_files(args.filenames)
 

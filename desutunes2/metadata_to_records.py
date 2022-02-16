@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 
+import logging
+from pathlib import Path
+from shutil import copy
+
 from sqlalchemy import select
 
-from .db import ensure_session, Artist, MetaArtist, MetaArtistComponent, PronouncableThing, Session
+from .db import (
+    ensure_session, Album, Anime, Artist, Label, MetaArtist,
+    MetaArtistComponent, PronouncableThing, Role, Session, Track
+)
 from .processfile import roledata
+from .parse_artist import parse_artist
 
 
 @ensure_session
@@ -17,8 +25,8 @@ def metaartist_from_artist_string(metaartist_text: str,
             if (artist := session.execute(
                     select(Artist)
                     .join(PronouncableThing)
-                    .where(romaji=component_text)
-            ).one_or_none()) is None:
+                    .where(PronouncableThing.romaji == component_text)
+            ).scalars().one_or_none()) is None:
                 artist = Artist(
                     name=PronouncableThing(romaji=component_text)
                 )
@@ -26,17 +34,19 @@ def metaartist_from_artist_string(metaartist_text: str,
                 metaartist=metaartist,
                 artist=artist,
                 ordering=index)
+            session.add(component)
         else:
             component = MetaArtistComponent(
                 metaartist=metaartist,
                 text=PronouncableThing(romaji=component_text),
                 ordering=index
             )
+            session.add(component)
     return metaartist
 
 
 @ensure_session
-def get_or_create_by_romaji(cls, romaji: str, *, session: Session):
+def get_by_romaji(cls, romaji: str, *, session: Session):
     return session.execute(
         select(cls)
         .join(PronouncableThing)
@@ -51,13 +61,16 @@ def add_records_from_metadata(records: list[roledata], *,
         metaartist.get_text(Spelling.romaji): metaartist
         for metaartist in session.execute(select(MetaArtist)).scalars().all()
     }
+    successfully_copied_count = 0
     for record in records:
         if (metaartist := all_metaartists.get(record.Artist)) is None:
-            metaartist = metaartist_from_artist_string(record.Artist)
-            all_metaartists[record.Arist] = metaartist
+            metaartist = metaartist_from_artist_string(record.Artist,
+                                                       session=session)
+            all_metaartists[record.Artist] = metaartist
 
         if (composer := all_metaartists.get(record.Composer)) is None:
-            composer = metaartist_from_artist_string(record.Composer)
+            composer = metaartist_from_artist_string(record.Composer,
+                                                     session=session)
             all_metaartists[record.Composer] = composer
 
         if (album := get_by_romaji(Album,
@@ -72,7 +85,7 @@ def add_records_from_metadata(records: list[roledata], *,
 
         track = Track(
             itunes_id=record.ID,
-            filename=record.Filename,
+            filename=str(record.Filename),
             tracktitle=PronouncableThing(romaji=record.Tracktitle),
             artist=metaartist,
             album=album,
@@ -96,4 +109,23 @@ def add_records_from_metadata(records: list[roledata], *,
                 kind=role_data.kind,
                 specifics=PronouncableThing(romaji=role_data.specifics)
             ))
+        session.flush()
+
+        if Path(record.OriginalFileName).is_file():
+            try:
+                record.Filename.parent.mkdir(parents=True, exist_ok=True)
+                copy(record.OriginalFileName, record.Filename)
+            except Exception:
+                logging.warning('Unable to copy %s to %s',
+                                record.OriginalFileName, record.Filename)
+            else:
+                successfully_copied_count += 1
+        else:
+            logging.warning('Unable to find %s to copy',
+                            record.OriginalFileName)
     session.commit()
+    if successfully_copied_count != len(records):
+        logging.warning('Unable to copy %d tracks',
+                        len(records) - successfully_copied_count)
+    logging.info('Successfully copied %d out of %d tracks',
+                 successfully_copied_count, len(records))
